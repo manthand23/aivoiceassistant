@@ -1,9 +1,9 @@
 import { toast } from "@/components/ui/sonner";
 
 // API configuration
-const DEEPGRAM_API_KEY = "98cd0f8512f4819f289a5db105a8cf087d3b4b1b";
-const OPENAI_API_KEY = "OPENAI_API_KEY";
-const ELEVENLABS_API_KEY = "sk_24ce41dd1bf34cda22777db2a05bf6e8c2e18b9e11df0095";
+const DEEPGRAM_API_KEY = import.meta.env.VITE_DEEPGRAM_API_KEY;
+const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
+const ELEVENLABS_API_KEY = import.meta.env.VITE_ELEVENLABS_API_KEY;
 
 // Define system prompt for OpenAI
 const SYSTEM_PROMPT = `
@@ -127,8 +127,6 @@ export const getAIResponse = async (messages: Message[]): Promise<string> => {
     return "I'm sorry, I'm having trouble processing your request right now. Could you please try again?";
   }
 };
-
-
 
 // Clean text for speech by removing special characters that shouldn't be spoken
 const cleanTextForSpeech = (text: string): string => {

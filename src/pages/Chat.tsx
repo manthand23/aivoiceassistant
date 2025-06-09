@@ -29,7 +29,7 @@ const Chat = () => {
   const [displayMessages, setDisplayMessages] = useState<any[]>([]);
   const [hasWelcomed, setHasWelcomed] = useState(false);
 
-  const conversation = useConversation({ name, email });
+  const conversation = useConversation({ name, email, isReturningUser });
 
   const { isRecording, setupMicrophone, toggleRecording } = useAudioRecording({
     onRecordingComplete: conversation.handleAudioSubmission,

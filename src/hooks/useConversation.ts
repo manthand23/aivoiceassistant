@@ -15,9 +15,10 @@ import { toast } from "@/components/ui/sonner";
 interface UseConversationProps {
   name: string;
   email: string;
+  isReturningUser?: boolean;
 }
 
-export function useConversation({ name, email }: UseConversationProps) {
+export function useConversation({ name, email, isReturningUser = false }: UseConversationProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -34,54 +35,14 @@ export function useConversation({ name, email }: UseConversationProps) {
       // Get conversation history
       const history = JSON.parse(localStorage.getItem("conversation_history") || "[]");
       
-      // Create a base greeting
-      let greeting = `Hello ${name}! I'm your AI Voice Assistant.`;
-      let hasFoundPreviousConversation = false;
-      
-      // Find the most recent conversation for this user
-      for (let i = history.length - 1; i >= 0; i--) {
-        const conv = history[i];
-        if (conv.messages && conv.messages.some((msg: Message) => 
-          msg.role === "assistant" && 
-          msg.content && 
-          msg.content.includes(`Hello ${name}!`)
-        )) {
-          // Extract user messages
-          const userMessages = conv.messages
-            .filter((msg: Message) => msg.role === "user")
-            .slice(-3); // Get the last 3 user messages
-            
-          if (userMessages.length > 0) {
-            // Get topics from previous conversations
-            const topics = userMessages.map((msg: Message) => {
-              const content = msg.content.toLowerCase();
-              if (content.includes("weather")) return "the weather forecast";
-              if (content.includes("calendar")) return "your calendar";
-              if (content.includes("email") || content.includes("send")) return "sending information to your email";
-              if (content.includes("renewable energy")) return "renewable energy developments";
-              if (content.includes("time management")) return "time management techniques";
-              if (content.includes("meeting") || content.includes("book")) return "booking a meeting";
-              return "various topics";
-            });
-            
-            // Get unique topics and filter out "various topics" if there are other specific topics
-            const uniqueTopics = Array.from(new Set(topics)).filter(topic => 
-              topics.some(t => t !== "various topics") ? topic !== "various topics" : true
-            );
-            
-            if (uniqueTopics.length > 0) {
-              greeting = `Hello ${name}! I remember our previous conversation about ${uniqueTopics.join(" and ")}. Would you like to continue that conversation?`;
-              hasFoundPreviousConversation = true;
-            }
-          }
-          break;
-        }
+      // For returning users, don't set an initial greeting
+      if (isReturningUser) {
+        setMessages([]);
+        return true;
       }
       
-      // If no previous conversation was found or no topics extracted, use the basic greeting
-      if (!hasFoundPreviousConversation) {
-        greeting += " How can I help you today?";
-      }
+      // Create a base greeting for new users
+      const greeting = `Hello ${name}! I'm your AI Voice Assistant. How can I help you today?`;
       
       // Create greeting message and set it
       const greetingMessage: Message = { role: "assistant", content: greeting };
@@ -130,7 +91,7 @@ export function useConversation({ name, email }: UseConversationProps) {
       
       localStorage.setItem("conversation_history", JSON.stringify(conversationHistory));
       
-      // Speak the greeting
+      // Speak the greeting only for new users
       setTimeout(() => {
         speakText(greeting);
       }, 300);
